@@ -15,7 +15,7 @@ import {
 const Courses: React.FC = () => {
   const { courses } = useCourses();
   const [searchTerm, setSearchTerm] = useState('');
-  const [levelFilter, setLevelFilter] = useState<string>('');
+  const [levelFilter, setLevelFilter] = useState<string>('all');
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -28,7 +28,7 @@ const Courses: React.FC = () => {
   const filteredCourses = courses.filter((course) => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           course.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLevel = levelFilter === '' || course.level === levelFilter;
+    const matchesLevel = levelFilter === 'all' || course.level === levelFilter;
     return matchesSearch && matchesLevel;
   });
 
@@ -54,7 +54,7 @@ const Courses: React.FC = () => {
                   <SelectValue placeholder="Filter by level" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Levels</SelectItem>
+                  <SelectItem value="all">All Levels</SelectItem>
                   <SelectItem value="Beginner">Beginner</SelectItem>
                   <SelectItem value="Intermediate">Intermediate</SelectItem>
                   <SelectItem value="Advanced">Advanced</SelectItem>

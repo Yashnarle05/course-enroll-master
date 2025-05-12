@@ -271,6 +271,18 @@ const Admin: React.FC = () => {
     onClose();
   };
 
+  // Create render functions for the form content
+  const renderFormContent = (close: () => void) => (
+    <CourseForm 
+      formData={formData} 
+      handleInputChange={handleInputChange} 
+      handleLevelChange={handleLevelChange} 
+      isEditing={isEditing}
+      handleSubmit={handleSubmit}
+      onClose={close}
+    />
+  );
+
   return (
     <MainLayout>
       <div className="bg-gray-50 min-h-screen py-8">
@@ -285,16 +297,7 @@ const Admin: React.FC = () => {
                 <DialogHeader>
                   <DialogTitle>{isEditing ? 'Edit Course' : 'Add New Course'}</DialogTitle>
                 </DialogHeader>
-                {({ close }: { close: () => void }) => (
-                  <CourseForm 
-                    formData={formData} 
-                    handleInputChange={handleInputChange} 
-                    handleLevelChange={handleLevelChange} 
-                    isEditing={isEditing}
-                    handleSubmit={handleSubmit}
-                    onClose={close}
-                  />
-                )}
+                {renderFormContent}
               </DialogContent>
             </Dialog>
           </div>
@@ -346,16 +349,7 @@ const Admin: React.FC = () => {
                                   <DialogHeader>
                                     <DialogTitle>Edit Course</DialogTitle>
                                   </DialogHeader>
-                                  {({ close }: { close: () => void }) => (
-                                    <CourseForm 
-                                      formData={formData} 
-                                      handleInputChange={handleInputChange} 
-                                      handleLevelChange={handleLevelChange} 
-                                      isEditing={isEditing}
-                                      handleSubmit={handleSubmit}
-                                      onClose={close}
-                                    />
-                                  )}
+                                  {renderFormContent}
                                 </DialogContent>
                               </Dialog>
                               <DropdownMenuItem 

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCourses } from '@/contexts/CourseContext';
 import MainLayout from '@/components/layout/MainLayout';
@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const MyLearning: React.FC = () => {
   const { user } = useAuth();
   const { courses } = useCourses();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = React.useState('all');
 
   // Mock enrolled courses with progress
@@ -57,6 +58,10 @@ const MyLearning: React.FC = () => {
     if (mostRecentCourse) {
       handleContinueCourse(mostRecentCourse.id);
     }
+  };
+
+  const navigateToCourses = () => {
+    navigate('/courses');
   };
 
   return (
@@ -135,16 +140,7 @@ const MyLearning: React.FC = () => {
           <div className="text-center py-16 bg-gray-50 rounded-lg">
             <h2 className="text-2xl font-bold mb-2">No enrolled courses yet</h2>
             <p className="text-gray-600 mb-6">Browse our catalog and enroll in your first course</p>
-            <Button 
-              onClick={() => {
-                // Fix: use proper navigation instead of direct DOM access
-                const coursesLink = document.querySelector('a[href="/courses"]');
-                if (coursesLink) {
-                  // Use the programmatic navigation approach instead of click()
-                  window.location.href = "/courses";
-                }
-              }}
-            >
+            <Button onClick={navigateToCourses}>
               Browse Courses
             </Button>
           </div>
