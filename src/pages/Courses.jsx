@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCourses } from '@/contexts/CourseContext';
 import { useAuth } from '@/contexts/AuthContext';
 import CourseCard from '@/components/courses/CourseCard';
@@ -22,6 +22,17 @@ const Courses = () => {
   const [levelFilter, setLevelFilter] = useState('all');
   const [priceFilter, setPriceFilter] = useState('all');
   const [sortBy, setSortBy] = useState('default');
+  const [localCourses, setLocalCourses] = useState([]);
+
+  // Ensure courses is always an array before using it
+  useEffect(() => {
+    if (courses && Array.isArray(courses)) {
+      setLocalCourses(courses);
+    } else {
+      console.error('Courses is not an array:', courses);
+      setLocalCourses([]);
+    }
+  }, [courses]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -43,8 +54,8 @@ const Courses = () => {
     enrollInCourse(courseId);
   };
 
-  // Apply filters and sorting
-  const filteredCourses = courses.filter((course) => {
+  // Apply filters and sorting on the local courses array
+  const filteredCourses = localCourses.filter((course) => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           course.description.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -75,10 +86,10 @@ const Courses = () => {
     return 0; // default, no sorting
   });
 
-  // Group courses by level for featured section
-  const beginnerCourses = courses.filter(course => course.level === 'Beginner').slice(0, 3);
-  const intermediateCourses = courses.filter(course => course.level === 'Intermediate').slice(0, 3);
-  const advancedCourses = courses.filter(course => course.level === 'Advanced').slice(0, 3);
+  // Group courses by level for featured section, ensuring we work with arrays
+  const beginnerCourses = localCourses.filter(course => course.level === 'Beginner').slice(0, 3);
+  const intermediateCourses = localCourses.filter(course => course.level === 'Intermediate').slice(0, 3);
+  const advancedCourses = localCourses.filter(course => course.level === 'Advanced').slice(0, 3);
 
   return (
     <MainLayout>

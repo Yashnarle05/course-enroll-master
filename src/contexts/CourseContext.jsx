@@ -116,7 +116,7 @@ export const CourseProvider = ({ children }) => {
     const fetchCourses = async () => {
       try {
         const response = await axios.get('/api/courses');
-        if (response.data && response.data.length > 0) {
+        if (response.data && Array.isArray(response.data) && response.data.length > 0) {
           setCourses(response.data);
           return;
         }
@@ -130,18 +130,32 @@ export const CourseProvider = ({ children }) => {
         localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(defaultCourses));
         setCourses(defaultCourses);
       } else {
-        setCourses(JSON.parse(storedCourses));
+        try {
+          const parsedCourses = JSON.parse(storedCourses);
+          if (Array.isArray(parsedCourses)) {
+            setCourses(parsedCourses);
+          } else {
+            console.error('Stored courses is not an array:', parsedCourses);
+            setCourses(defaultCourses);
+          }
+        } catch (error) {
+          console.error('Error parsing stored courses:', error);
+          setCourses(defaultCourses);
+        }
       }
     };
 
     // Load enrollments
     const fetchEnrollments = async () => {
-      if (!user) return;
+      if (!user) {
+        setEnrollments([]);
+        return;
+      }
       
       try {
         // Try to fetch user enrollments from API
         const response = await axios.get(`/api/enrollments/user/${user.id}`);
-        if (response.data) {
+        if (response.data && Array.isArray(response.data)) {
           setEnrollments(response.data);
           return;
         }
@@ -152,7 +166,20 @@ export const CourseProvider = ({ children }) => {
       // Fallback to local storage
       const storedEnrollments = localStorage.getItem(ENROLLMENTS_STORAGE_KEY);
       if (storedEnrollments) {
-        setEnrollments(JSON.parse(storedEnrollments));
+        try {
+          const parsedEnrollments = JSON.parse(storedEnrollments);
+          if (Array.isArray(parsedEnrollments)) {
+            setEnrollments(parsedEnrollments);
+          } else {
+            console.error('Stored enrollments is not an array:', parsedEnrollments);
+            setEnrollments([]);
+          }
+        } catch (error) {
+          console.error('Error parsing stored enrollments:', error);
+          setEnrollments([]);
+        }
+      } else {
+        setEnrollments([]);
       }
     };
     
@@ -380,8 +407,8 @@ export const CourseProvider = ({ children }) => {
   return (
     <CourseContext.Provider
       value={{
-        courses,
-        enrollments,
+        courses: Array.isArray(courses) ? courses : [],
+        enrollments: Array.isArray(enrollments) ? enrollments : [],
         enrollInCourse,
         getUserEnrollments,
         getEnrolledCourses,
