@@ -132,130 +132,7 @@ const Admin = () => {
     onClose();
   };
 
-  const renderForm = (close) => {
-    return (
-      <form onSubmit={(e) => handleSubmit(e, close)} className="space-y-4 py-4">
-        <div className="grid grid-cols-1 gap-4">
-          <div className="space-y-2">
-            <label htmlFor="title" className="text-sm font-medium">
-              Course Title
-            </label>
-            <Input
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              placeholder="Enter course title"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">
-              Description
-            </label>
-            <Textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Enter course description"
-              rows={4}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="instructor" className="text-sm font-medium">
-                Instructor
-              </label>
-              <Input
-                id="instructor"
-                name="instructor"
-                value={formData.instructor}
-                onChange={handleInputChange}
-                placeholder="Enter instructor name"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="duration" className="text-sm font-medium">
-                Duration
-              </label>
-              <Input
-                id="duration"
-                name="duration"
-                value={formData.duration}
-                onChange={handleInputChange}
-                placeholder="e.g. 6 hours"
-              />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="level" className="text-sm font-medium">
-                Level
-              </label>
-              <Select value={formData.level} onValueChange={handleLevelChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Beginner">Beginner</SelectItem>
-                  <SelectItem value="Intermediate">Intermediate</SelectItem>
-                  <SelectItem value="Advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="price" className="text-sm font-medium">
-                Price ($)
-              </label>
-              <Input
-                id="price"
-                name="price"
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.price}
-                onChange={handleInputChange}
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="thumbnail" className="text-sm font-medium">
-              Thumbnail URL
-            </label>
-            <Input
-              id="thumbnail"
-              name="thumbnail"
-              value={formData.thumbnail}
-              onChange={handleInputChange}
-              placeholder="Enter image URL"
-            />
-            <p className="text-xs text-gray-500">
-              Use a placeholder image or URL to an image (e.g., https://placehold.co/600x400)
-            </p>
-          </div>
-        </div>
-        
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="outline">
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button type="submit">
-            {isEditing ? 'Update Course' : 'Add Course'}
-          </Button>
-        </DialogFooter>
-      </form>
-    );
-  };
-
+  // Fixed the render function to not be a separate component but inline JSX
   return (
     <MainLayout>
       <div className="bg-gray-50 min-h-screen py-8">
@@ -270,7 +147,127 @@ const Admin = () => {
                 <DialogHeader>
                   <DialogTitle>{isEditing ? 'Edit Course' : 'Add New Course'}</DialogTitle>
                 </DialogHeader>
-                {renderForm}
+                {({ close }) => (
+                  <form onSubmit={(e) => handleSubmit(e, close)} className="space-y-4 py-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="space-y-2">
+                        <label htmlFor="title" className="text-sm font-medium">
+                          Course Title
+                        </label>
+                        <Input
+                          id="title"
+                          name="title"
+                          value={formData.title}
+                          onChange={handleInputChange}
+                          placeholder="Enter course title"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label htmlFor="description" className="text-sm font-medium">
+                          Description
+                        </label>
+                        <Textarea
+                          id="description"
+                          name="description"
+                          value={formData.description}
+                          onChange={handleInputChange}
+                          placeholder="Enter course description"
+                          rows={4}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label htmlFor="instructor" className="text-sm font-medium">
+                            Instructor
+                          </label>
+                          <Input
+                            id="instructor"
+                            name="instructor"
+                            value={formData.instructor}
+                            onChange={handleInputChange}
+                            placeholder="Enter instructor name"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label htmlFor="duration" className="text-sm font-medium">
+                            Duration
+                          </label>
+                          <Input
+                            id="duration"
+                            name="duration"
+                            value={formData.duration}
+                            onChange={handleInputChange}
+                            placeholder="e.g. 6 hours"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label htmlFor="level" className="text-sm font-medium">
+                            Level
+                          </label>
+                          <Select value={formData.level} onValueChange={handleLevelChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Beginner">Beginner</SelectItem>
+                              <SelectItem value="Intermediate">Intermediate</SelectItem>
+                              <SelectItem value="Advanced">Advanced</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label htmlFor="price" className="text-sm font-medium">
+                            Price ($)
+                          </label>
+                          <Input
+                            id="price"
+                            name="price"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={formData.price}
+                            onChange={handleInputChange}
+                            placeholder="0.00"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label htmlFor="thumbnail" className="text-sm font-medium">
+                          Thumbnail URL
+                        </label>
+                        <Input
+                          id="thumbnail"
+                          name="thumbnail"
+                          value={formData.thumbnail}
+                          onChange={handleInputChange}
+                          placeholder="Enter image URL"
+                        />
+                        <p className="text-xs text-gray-500">
+                          Use a placeholder image or URL to an image (e.g., https://placehold.co/600x400)
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="button" variant="outline">
+                          Cancel
+                        </Button>
+                      </DialogClose>
+                      <Button type="submit">
+                        {isEditing ? 'Update Course' : 'Add Course'}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                )}
               </DialogContent>
             </Dialog>
           </div>
@@ -322,7 +319,125 @@ const Admin = () => {
                                   <DialogHeader>
                                     <DialogTitle>Edit Course</DialogTitle>
                                   </DialogHeader>
-                                  {renderForm}
+                                  {({ close }) => (
+                                    <form onSubmit={(e) => handleSubmit(e, close)} className="space-y-4 py-4">
+                                      <div className="grid grid-cols-1 gap-4">
+                                        <div className="space-y-2">
+                                          <label htmlFor="edit-title" className="text-sm font-medium">
+                                            Course Title
+                                          </label>
+                                          <Input
+                                            id="edit-title"
+                                            name="title"
+                                            value={formData.title}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter course title"
+                                          />
+                                        </div>
+                                        
+                                        {/* Same form fields as add course but with different ids */}
+                                        <div className="space-y-2">
+                                          <label htmlFor="edit-description" className="text-sm font-medium">
+                                            Description
+                                          </label>
+                                          <Textarea
+                                            id="edit-description"
+                                            name="description"
+                                            value={formData.description}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter course description"
+                                            rows={4}
+                                          />
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                          <div className="space-y-2">
+                                            <label htmlFor="edit-instructor" className="text-sm font-medium">
+                                              Instructor
+                                            </label>
+                                            <Input
+                                              id="edit-instructor"
+                                              name="instructor"
+                                              value={formData.instructor}
+                                              onChange={handleInputChange}
+                                              placeholder="Enter instructor name"
+                                            />
+                                          </div>
+                                          
+                                          <div className="space-y-2">
+                                            <label htmlFor="edit-duration" className="text-sm font-medium">
+                                              Duration
+                                            </label>
+                                            <Input
+                                              id="edit-duration"
+                                              name="duration"
+                                              value={formData.duration}
+                                              onChange={handleInputChange}
+                                              placeholder="e.g. 6 hours"
+                                            />
+                                          </div>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                          <div className="space-y-2">
+                                            <label htmlFor="edit-level" className="text-sm font-medium">
+                                              Level
+                                            </label>
+                                            <Select value={formData.level} onValueChange={handleLevelChange}>
+                                              <SelectTrigger>
+                                                <SelectValue placeholder="Select level" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                <SelectItem value="Beginner">Beginner</SelectItem>
+                                                <SelectItem value="Intermediate">Intermediate</SelectItem>
+                                                <SelectItem value="Advanced">Advanced</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                          
+                                          <div className="space-y-2">
+                                            <label htmlFor="edit-price" className="text-sm font-medium">
+                                              Price ($)
+                                            </label>
+                                            <Input
+                                              id="edit-price"
+                                              name="price"
+                                              type="number"
+                                              min="0"
+                                              step="0.01"
+                                              value={formData.price}
+                                              onChange={handleInputChange}
+                                              placeholder="0.00"
+                                            />
+                                          </div>
+                                        </div>
+                                        
+                                        <div className="space-y-2">
+                                          <label htmlFor="edit-thumbnail" className="text-sm font-medium">
+                                            Thumbnail URL
+                                          </label>
+                                          <Input
+                                            id="edit-thumbnail"
+                                            name="thumbnail"
+                                            value={formData.thumbnail}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter image URL"
+                                          />
+                                        </div>
+                                      </div>
+                                      
+                                      <DialogFooter>
+                                        <DialogClose asChild>
+                                          <Button type="button" variant="outline">
+                                            Cancel
+                                          </Button>
+                                        </DialogClose>
+                                        <Button type="submit">
+                                          Update Course
+                                        </Button>
+                                      </DialogFooter>
+                                    </form>
+                                  )}
                                 </DialogContent>
                               </Dialog>
                               <DropdownMenuItem 

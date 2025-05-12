@@ -1,169 +1,166 @@
 
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCourses } from '@/contexts/CourseContext';
 import MainLayout from '@/components/layout/MainLayout';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Play, BookOpen, CheckCircle, Clock } from 'lucide-react';
 
 const MyLearning = () => {
   const { user } = useAuth();
-  const { getEnrolledCourses, getUserEnrollments, updateCourseProgress } = useCourses();
+  const { courses, getUserEnrollments, updateCourseProgress } = useCourses();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
-  
+
   // Redirect if not logged in
   if (!user) {
     return <Navigate to="/login" />;
   }
 
-  const enrolledCourses = getEnrolledCourses();
+  // Get user enrollments
   const userEnrollments = getUserEnrollments();
 
-  const getEnrollmentForCourse = (courseId) => {
-    return userEnrollments.find(enrollment => enrollment.courseId === courseId);
-  };
+  // Create enrolled courses with progress
+  const enrolledCourses = userEnrollments.map(enrollment => {
+    const course = courses.find(c => c.id === enrollment.courseId);
+    return {
+      ...course,
+      progress: enrollment.progress,
+      lastActivity: enrollment.enrolledAt ? new Date(enrollment.enrolledAt).toLocaleDateString() : 'Not started',
+    };
+  });
 
-  const handleContinueLearning = (courseId) => {
-    // In a real app, this would navigate to the course content
-    console.log('Continue learning for course:', courseId);
-  };
+  // Filter courses based on tab
+  const filteredCourses = React.useMemo(() => {
+    if (activeTab === 'all') return enrolledCourses;
+    if (activeTab === 'in-progress') return enrolledCourses.filter(course => course.progress > 0 && course.progress < 100);
+    if (activeTab === 'completed') return enrolledCourses.filter(course => course.progress === 100);
+    if (activeTab === 'not-started') return enrolledCourses.filter(course => course.progress === 0);
+    return enrolledCourses;
+  }, [activeTab, enrolledCourses]);
 
-  const handleIncrementProgress = (courseId) => {
-    const enrollment = getEnrollmentForCourse(courseId);
-    if (enrollment) {
-      const newProgress = Math.min(100, enrollment.progress + 10);
+  const handleContinueCourse = (courseId) => {
+    // In a real app, this would navigate to the specific lesson the user was on
+    console.log(`Continuing course: ${courseId}`);
+    
+    // For demo purposes, increase progress by 25% each time
+    const course = enrolledCourses.find(c => c.id === courseId);
+    if (course) {
+      const newProgress = Math.min(course.progress + 25, 100);
       updateCourseProgress(courseId, newProgress);
     }
+    
+    // Navigate to course details
+    navigate(`/courses/${courseId}`);
   };
 
-  // Filter courses based on active tab
-  const filteredCourses = enrolledCourses.filter(course => {
-    if (activeTab === 'all') return true;
+  const handleContinueLearning = () => {
+    // Find the most recently accessed course
+    const mostRecentCourse = enrolledCourses.reduce((prev, current) => {
+      // In a real app, you would compare timestamps
+      return (prev.progress > current.progress) ? prev : current;
+    }, enrolledCourses[0]);
     
-    const enrollment = getEnrollmentForCourse(course.id);
-    if (!enrollment) return false;
-    
-    if (activeTab === 'inProgress') {
-      return enrollment.progress > 0 && enrollment.progress < 100;
-    } else if (activeTab === 'completed') {
-      return enrollment.progress === 100;
+    if (mostRecentCourse) {
+      handleContinueCourse(mostRecentCourse.id);
     }
-    return false;
-  });
+  };
+
+  const navigateToCourses = () => {
+    navigate('/courses');
+  };
 
   return (
     <MainLayout>
-      <div className="bg-gray-50 min-h-screen py-8">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-8">My Learning</h1>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">My Learning</h1>
+            <p className="text-gray-600">Track your progress and continue where you left off</p>
+          </div>
+          
+          {enrolledCourses.length > 0 && (
+            <Button 
+              className="mt-4 md:mt-0" 
+              onClick={handleContinueLearning}
+            >
+              Continue Learning
+            </Button>
+          )}
+        </div>
 
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-            <div className="border-b mb-6">
-              <TabsList className="bg-transparent">
-                <TabsTrigger value="all" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">All Courses</TabsTrigger>
-                <TabsTrigger value="inProgress" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">In Progress</TabsTrigger>
-                <TabsTrigger value="completed" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary">Completed</TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent value={activeTab}>
-              {filteredCourses.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredCourses.map((course) => {
-                    const enrollment = getEnrollmentForCourse(course.id);
-                    const progress = enrollment ? enrollment.progress : 0;
-                    const isCompleted = progress === 100;
-                    
-                    return (
-                      <Card key={course.id} className="overflow-hidden">
-                        <img 
-                          src={course.thumbnail} 
-                          alt={course.title} 
-                          className="w-full h-48 object-cover"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://placehold.co/600x400?text=Course";
-                          }}
-                        />
-                        <CardHeader>
-                          <CardTitle>{course.title}</CardTitle>
-                          <p className="text-sm text-gray-500">by {course.instructor}</p>
-                        </CardHeader>
-                        
-                        <CardContent className="space-y-4">
-                          <div>
-                            <div className="flex justify-between text-sm mb-1">
-                              <span>Progress</span>
-                              <span>{progress}%</span>
-                            </div>
-                            <Progress value={progress} className="h-2" />
-                          </div>
-                          
-                          <div className="flex items-center text-sm text-gray-500">
-                            <Clock className="h-4 w-4 mr-2" />
-                            <span>{course.duration}</span>
-                            <span className="mx-2">•</span>
-                            <BookOpen className="h-4 w-4 mr-2" />
-                            <span>{course.level}</span>
-                          </div>
-                        </CardContent>
-                        
-                        <CardFooter className="flex justify-between">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleIncrementProgress(course.id)}
-                          >
-                            {isCompleted ? (
-                              <><CheckCircle className="h-4 w-4 mr-2" /> Completed</>
-                            ) : (
-                              <>+ Progress</>
-                            )}
-                          </Button>
-                          
-                          <Button 
-                            variant={isCompleted ? "outline" : "default"} 
-                            size="sm"
-                            onClick={() => {
-                              const button = document.getElementById(`continue-${course.id}`);
-                              if (button) {
-                                button.classList.add('animate-pulse');
-                                setTimeout(() => button.classList.remove('animate-pulse'), 1000);
-                              }
-                              handleContinueLearning(course.id);
-                            }}
-                            id={`continue-${course.id}`}
-                          >
-                            <Play className="h-4 w-4 mr-2" /> 
-                            {isCompleted ? 'Review' : 'Continue'}
-                          </Button>
-                        </CardFooter>
-                      </Card>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-12 bg-white rounded-lg shadow">
-                  <h3 className="text-xl font-medium mb-2">No courses found</h3>
-                  <p className="text-gray-600 mb-4">
-                    {activeTab === 'all' 
-                      ? "You haven't enrolled in any courses yet." 
-                      : activeTab === 'inProgress' 
-                        ? "You don't have any courses in progress." 
-                        : "You haven't completed any courses yet."}
-                  </p>
-                  <Button onClick={() => window.location.href = '/courses'}>
-                    Browse Courses
-                  </Button>
+        {enrolledCourses.length > 0 ? (
+          <Tabs defaultValue="all" onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-4 mb-8">
+              <TabsTrigger value="all">All Courses</TabsTrigger>
+              <TabsTrigger value="in-progress">In Progress</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="not-started">Not Started</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value={activeTab} className="mt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredCourses.map(course => (
+                  <Card key={course.id} className="overflow-hidden">
+                    <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                      <img 
+                        src={course.thumbnail} 
+                        alt={course.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <CardHeader>
+                      <CardTitle>{course.title}</CardTitle>
+                      <CardDescription>Instructor: {course.instructor}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pb-2">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-sm font-medium">Progress</span>
+                        <span className="text-sm text-gray-500">{course.progress}%</span>
+                      </div>
+                      <Progress value={course.progress} className="h-2" />
+                      <p className="mt-4 text-sm text-gray-500">Last activity: {course.lastActivity}</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => handleContinueCourse(course.id)}
+                      >
+                        {course.progress > 0 ? 'Continue Learning' : 'Start Course'}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+              
+              {filteredCourses.length === 0 && (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <h3 className="text-lg font-medium mb-2">No courses found</h3>
+                  <p className="text-gray-600 mb-4">Try selecting a different filter</p>
                 </div>
               )}
             </TabsContent>
           </Tabs>
-        </div>
+        ) : (
+          <div className="text-center py-16 bg-gray-50 rounded-lg">
+            <h2 className="text-2xl font-bold mb-2">No enrolled courses yet</h2>
+            <p className="text-gray-600 mb-6">Browse our catalog and enroll in your first course</p>
+            <Button onClick={navigateToCourses}>
+              Browse Courses
+            </Button>
+          </div>
+        )}
       </div>
     </MainLayout>
   );
